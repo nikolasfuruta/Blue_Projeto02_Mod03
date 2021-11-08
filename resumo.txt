@@ -1,0 +1,42 @@
+Criar uma API backend onde existirão 3 rotas principais:
+
+
+- Paises
+     - nome
+     - população
+     - lingua mãe
+     - PIB
+
+- Estados
+     - nome
+     - região
+     - população
+     - valor salario minimo
+
+- Cidades
+     - nome
+     - quantidade de bairros
+     - população
+     - data de aniversão da cidade
+
+
+
+
+Dentro de cada rota precisamos ter as seguintes subrotas(sigam esses nomes por padrao):
+- /add
+- /update
+- /delete
+- /listall
+- /listname
+
+
+Cada rota vale 2 pontos se estiver completa com as 5 subrotas - 6
+
+
+O projeto precisa ter validaçoes de entrada de dados tanto no create quando no update - 1
+O Mongo Atlas precisa estar configurado e funcionando com o projeto - 1
+O projeto precisa estar postado no heroku - 1
+O readme do github precisa estar totalmente preenchi e detalhado todas as rotas existentes e colletion e env do thunder - 1
+
+
+A entrega deve ser feita enviando o link do heroku e do repositório do github.
