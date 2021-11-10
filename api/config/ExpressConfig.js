@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require("./mongooseConfig")
 const consign = require('consign');
+const cors = require('cors');
 
 class App {
 
@@ -18,6 +19,10 @@ class App {
 
     midd(){
         this.init.use(express.json());
+        this.init.use(cors({
+            origin:"*",
+            methods:['GET','POST','PUT','DELETE']
+        }));
     }
 
     routes(){

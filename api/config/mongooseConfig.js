@@ -16,7 +16,7 @@ mongoose.connect(connectionString, {
     useUnifiedTopology: true
 })
 .then(()=>{console.log("CONECTADO AO MONGODB")})
-.catch((err)=>{console.error({"FALHA NA CONEXÃO COM O MONGODB":err.message})})
+.catch((err)=>{console.error({"FALHA AO CONECTAR COM O MONGODB":err.message})})
 
 //EVENTOS
 mongoose.connection.on("connected", ()=>{console.log("CONECTADO AO MONGOOSE")});
