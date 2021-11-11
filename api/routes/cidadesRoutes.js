@@ -1,4 +1,4 @@
-const CidadesController = require('../controllers/CidadeController');
+const CidadesController = require('../controllers/CidadesController');
 const {Router} = require('express');
 const router = Router();
 
