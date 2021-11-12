@@ -6,14 +6,14 @@ class PaisesController {
     static async adicionar(req,res){
         if(Validate.validarPaises(req.body)){
             try{
-                const result = await PaisesModel.adicionar(info);
-                return res.status(201).json({"ADICIONADO": result});
+                const result = await PaisesModel.adicionar(req.body);
+                return res.status(201).json(result);
             } catch(err){
                 console.error(err.message);
-                res.status(400).json("ERRO AO ADICIONAR");
+                res.status(400).json({message:"ERRO AO ADICIONAR"});
             }
         } else {
-            return res.status(400).json("INFORMAÇÃO DE CADASTRO INCORRETA");
+            return res.status(400).json({message:"INFORMAÇÃO DE CADASTRO INCORRETA"});
         }
     }
 
@@ -58,7 +58,7 @@ class PaisesController {
     static async alterar(req,res){
         if(Validate.validarNome(req.params.nome)||Validate.validarPaises(req.body)){
             try{
-                const result = await PaisesModel.alterar(req.params.nome, info);
+                const result = await PaisesModel.alterar(req.params.nome, req.body);
                 return res.status(200).json(result);
             } catch(err){
                 console.error(err.message);

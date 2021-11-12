@@ -38,9 +38,9 @@ No projeto foi adotado o padrão MVC com pequenos ajustes para tornar as respons
 
 
 
-## ``INICIANDO``
+## ``Iniciando o Projeto``
 
-Iniciamos o projeto criando um arquivo **server.js** na root do projeto
+Iniciamos o projeto criando um arquivo **server.js** no root do projeto
 
 Em seguida utilizamos  o **npm**
 
@@ -73,6 +73,7 @@ api
    |- database
    |- models
    |- routes
+   |- validations
 ```
 
 No <u>config</u> criamos dois arquivos: **ExpressConfig.js** e **mongooseConfig.js**
@@ -127,7 +128,11 @@ E se tudo rodar perfeitamente, teremos a seguinte saída
 SERVIDOR RODANDO NA PORTA 3000
 ```
 
-Agora iniciamos a configuração para integração com o Banco de Dados. Para isso, utilizamos o mongoose
+
+
+## ``Integração com o Banco de Dados``
+
+Iniciamos a configuração para integração com o banco de dados instalando o mongoose, que é o módulo responsável por conectar o programa ao banco de dados
 
 ```javascript
 npm i mongoose
@@ -254,9 +259,13 @@ CONECTADO AO MONGOOSE
 CONECTADO AO MONGODB
 ```
 
+
+
+## ``PREPARAÇÃO PARA O CRUD``
+
 Agora que temos a conexão com o banco de dados, vamos começar a manipulá-lo. Para isso, criamos dentro do <u>routes</u> 4 arquivos: **paisesRoutes.js**, **estadosRoutes.js**, **cidadesRoutes.js** e **index.js** 
 
-Nos 3 primeiros arquivos a estrutura será a mesma.
+Em  **paisesRoutes.js**, **estadosRoutes.js**, **cidadesRoutes.js**, a estrutura será a mesma.
 
 Começamos por importar **Router()**  e definir as sub-rotas GET, POST,  PUT, DELETE
 
@@ -294,7 +303,7 @@ Voltando para o <u>ExpressConfig.js</u>, definimos o método **routes()**. Para 
 npm i consign
 ```
 
-Ao chamar **consign()** dentro do método <u>routes()</u>, definimos como diretório base (cwd)  o diretório api. E configuramos para que **this.init**  passe como parâmetro para o path especificado (no caso, a função que acabamos de criar).
+Ao chamar **consign()** dentro do método <u>routes()</u>, definimos como diretório base (cwd)  o diretório api. E configuramos para que **this.init**  seja passado como parâmetro para o  <u>index.js</u> (no caso, a função que acabamos de criar).
 
 Agora todas as rotas são enviadas para o **index.js** e deste, para o **this.routes()**
 
@@ -322,8 +331,8 @@ class App {
     }
 
     routes(){
-        consign({cwd:'api'})
-            .include('routes/index.js')
+        consign({cwd:'api'}) //api definido como current working directory
+            .include('routes/index.js') //path onde será enviado o this.init
             .into(this.init)
     }
 }
@@ -346,19 +355,17 @@ CONECTADO AO MONGOOSE
 CONECTADO AO MONGODB
 ```
 
-```
-
-DESCREVER SOBRE OS SCHEMAS AQUI!!!!!
-
-```
 
 
+## ``INICIANDO O CRUD``
 
-No <u>controllers</u>, criamos 3 arquivos: **PaisesController.js**, **EstadosController.js**, **CidadesController.js** que serão exportados para os respectivos <u>routes</u>
+**Como as rotas seguem as mesmas estruturas, será demostrada o CRUD somente da rota Países**
 
-No <u>models</u> também criamos 3 arquivos:  **PaisesModel.js**, **EstadosModel.js**, **CidadesModel.js** que serão exportados para os respectivos <u>controllers</u>
+No <u>controllers</u>, criamos o arquivo: **PaisesController.js**
 
-Agora definimos os métodos de manipulação do banco de dados no <u>routes</u>
+No <u>models</u> também criamos o arquivo:  **PaisesModel.js**
+
+Iniciamos o CRUD importando o <u>Controller</u> no <u>Routes</u> e definindo os métodos ligados a cada sub-rota
 
 ```javascript
 const PaisesController = require('../controllers/PaisesController');
@@ -378,52 +385,302 @@ module.exports = router
 
 Os <u>controllers</u> serão classes contendo métodos que receberão as requisições e decidirão quais manipulações deverão ser realizadas no banco de dados pelos <u>models</u>.
 
- Por lidar com informações externas(requisições), estas devem ser validadas antes prosseguirem para o <u>models</u>, assim criamos no <u>api</u> o diretório **validations** que conterá as funções de validação das informações.
+ Por lidar com informações externas(requisições), estas devem ser validadas antes prosseguirem para o <u>models</u>, assim criamos no <u>api</u> o diretório **validations** que conterá a classe **Validate** contendo os métodos de validação das informações.
 
-Com todo o ambiente pronto, definimos a classe <u>Controller</u>
+```javascript
+class Validate {
+
+    static validarNome(nome){
+        if(/\d/.test(nome)||/\W/.test(nome)){
+            return false
+        }
+        return true
+    }
+
+    static validarPaises(info){
+        if(!info||!info.nome||!info.populacao||!info.linguaMae||!info.pib){
+            return false
+        }
+        return true
+    }
+
+    static validarEstados(info){
+        if(!info||!info.nome||!info.regiao||!info.populacao||!info.salarioMinimo){
+            return false
+        }
+        return true
+    }
+
+    static validarCidades(){
+        if(!info||!info.nome||!info.quantidadeDeBairros||!info.populacao||!info.aniversarioDaCidade){
+            return false
+        }
+        return true
+    }
+}
+
+module.exports = Validate;
+```
+
+Com todo o ambiente pronto, iniciamos o CRUD
+
+
+
+## ``POST``
+
+<u>Controller</u>
 
 ```javascript
 const PaisesModel = require('../models/PaisesModel');
-const {validarNome, validarInfo} = require('../validations/paisesValidations')//funções do validations
+const Validate = require('../validations/Validate');
+
+class PaisesController {
+
+    static async adicionar(req,res){
+        if(Validate.validarPaises(req.body)){
+            try{
+                const result = await PaisesModel.adicionar(req.body);
+                return res.status(201).json({"ADICIONADO": result});
+            } catch(err){
+                console.error(err.message);
+                res.status(400).json("ERRO AO ADICIONAR");
+            }
+        } else {
+            return res.status(400).json("INFORMAÇÃO DE CADASTRO INCORRETA");
+        }
+    }
+}
+module.exports = PaisesController
+```
+
+<u>Model</u>
+
+```javascript
+const Paises = require('../database/paisesSchema');
+
+class PaisesModel {
+
+    static async adicionar(info){
+        return await Paises.create(info)
+    }
+}
+module.exports = PaisesModel;
+```
+
+Retorno
+
+```
+Status: 201 Created
+Size: 111 Bytes
+Time: 152 ms
+```
+
+
+
+## ``GET``
+
+<u>Controller</u>
+
+```javascript
+const PaisesModel = require('../models/PaisesModel');
+const Validate = require('../validations/Validate');
+
+class PaisesController {
+    static async listar(req,res){
+        try{
+            const result = await PaisesModel.listar();
+            return res.status(200).json(result);
+        } catch(err){
+            console.error(err.message);
+            res.status(400).json({message:"ERRO AO OBTER A LISTA"});
+        }
+    }
+}
+module.exports = PaisesController
+```
+
+<u>Model</u>
+
+```javascript
+const Paises = require('../database/paisesSchema');
+
+class PaisesModel {
+    static async listar(){
+        return await Paises.find()
+    }
+}
+module.exports = PaisesModel;
+```
+
+Retorno
+
+```
+Status: 200 OK
+Size: 215 Bytes
+Time: 54 ms
+```
+
+
+
+## ``GET``
+
+<u>Controller</u>
+
+```javascript
+const PaisesModel = require('../models/PaisesModel');
+const Validate = require('../validations/Validate');
 
 class PaisesController {
     static async buscaPorNome(req,res){
-        if(validarNome(req.params.nome)){
+        if(Validate.validarNome(req.params.nome)){
             try{
-                const result = await PaisesModel.buscaPorNome(req.params.nome)
-                return res.status(200).json(result)
+                const result = await PaisesModel.buscaPorNome(req.params.nome);
+                return res.status(200).json(result);
             } catch(err){
                 console.error(err.message);
-                res.status(400).json({message:"ERRO NA BUSCA"})
+                res.status(400).json({message:"ERRO NA BUSCA"});
             }
         } else {
             return res.status(400).json({message:"PARÂMETRO NOME INCORRETO"});
         }
     }
-
+}
 module.exports = PaisesController
 ```
 
-E o **paisesValidations.js** definimos da seguinte forma
+<u>Model</u>
 
 ```javascript
-exports.validarInfo = (info) => {
-    //informações definidas no Schemas
-    if(!info||!info.nome||!info.populacao||!info.linguaMae||!info.pib){
-        return false
-    }
-    return true
-}
+const Paises = require('../database/paisesSchema');
 
-exports.validarNome = (nome) => {
-    if(/\d/.test(nome)||/\W/.test(nome)){
-        return false
+class PaisesModel {
+	static async buscaPorNome(nome){
+        const pais = await Paises.findOne({ nome: nome });
+        if (pais === null) {
+            return { message: "NOME NÃO ENCONTRADO" };
+        } else {
+            return {"OBJETO ENCONTRADO":pais};
+        }
     }
-    return true
 }
+module.exports = PaisesModel;
+```
+
+Retorno
+
+```
+Status: 200 OK
+Size: 123 Bytes
+Time: 34 ms
 ```
 
 
+
+## ``PUT``
+
+<u>Controller</u>
+
+```javascript
+const PaisesModel = require('../models/PaisesModel');
+const Validate = require('../validations/Validate');
+
+class PaisesController {
+    static async alterar(req,res){
+        if(Validate.validarNome(req.params.nome)||Validate.validarPaises(req.body)){
+            try{
+                const result = await PaisesModel.alterar(req.params.nome, req.body);
+                return res.status(200).json(result);
+            } catch(err){
+                console.error(err.message);
+                res.status(400).json({message:"ERRO AO ALTERAR"});
+            }
+        } else {
+            return res.status(400).json({message:"INFORMAÇÃO DE ACESSO INCORRETO"});
+        }
+    }
+}
+module.exports = PaisesController
+```
+
+<u>Model</u>
+
+```javascript
+const Paises = require('../database/paisesSchema');
+
+class PaisesModel {
+    static async alterar(nome, info){
+        const result = await Paises.findOneAndUpdate({nome:nome},info);
+        if(result===null){
+            return {message:"NOME NÃO ENCONTRADO"}
+        } else {
+            return result
+        }
+    }
+}
+module.exports = PaisesModel;
+```
+
+Retorno
+
+```
+Status: 200 OK
+Size: 121 Bytes
+Time: 66 ms
+```
+
+
+
+## ``DELETE``
+
+<u>Controller</u>
+
+```javascript
+const PaisesModel = require('../models/PaisesModel');
+const Validate = require('../validations/Validate');
+
+class PaisesController {
+    static async deletar(req,res){
+        if(Validate.validarNome(req.params.nome)){
+            try{
+                const result = await PaisesModel.deletar(req.params.nome);
+                return res.status(200).json(result);
+            } catch(err){
+                console.error(err.message);
+                res.status(400).json({message:"ERRO AO DELETAR"});
+            }
+        } else {
+            return res.status(400).json({message:"PARÂMETRO NOME INCORRETO"});
+        }
+    }
+}
+module.exports = PaisesController
+```
+
+<u>Model</u>
+
+```javascript
+const Paises = require('../database/paisesSchema');
+
+class PaisesModel {
+    static async deletar(nome){
+        const result = await Paises.findOneAndDelete({nome:nome});
+        if(result===null){
+            return {message:"NOME NÃO ENCONTRADO"}
+        } else {
+            return result
+        }
+    }
+}
+module.exports = PaisesModel;
+```
+
+Retorno
+
+```
+Status: 200 OK
+Size: 121 Bytes
+Time: 647 ms
+```
 
 
 

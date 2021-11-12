@@ -24,7 +24,7 @@ class PaisesModel {
         if(result===null){
             return {message:"NOME NÃO ENCONTRADO"}
         } else {
-            return {"OBJETO DELETADO":result}
+            return result
         }
     }
 
@@ -33,7 +33,7 @@ class PaisesModel {
         if(result===null){
             return {message:"NOME NÃO ENCONTRADO"}
         } else {
-            return {"OBJETO ALTERADO": result}
+            return result
         }
     }
 }
