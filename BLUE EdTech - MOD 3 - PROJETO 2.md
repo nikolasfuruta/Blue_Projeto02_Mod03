@@ -22,6 +22,8 @@ No projeto foi adotado o padrão MVC com pequenos ajustes para tornar as respons
 
 **DATABASE** - responsável pelas definições das Collections;
 
+**VALIDATIONS** - responsável pelas validações das requisições;
+
 
 
 ## ``Tecnologias``
@@ -344,6 +346,14 @@ CONECTADO AO MONGOOSE
 CONECTADO AO MONGODB
 ```
 
+```
+
+DESCREVER SOBRE OS SCHEMAS AQUI!!!!!
+
+```
+
+
+
 No <u>controllers</u>, criamos 3 arquivos: **PaisesController.js**, **EstadosController.js**, **CidadesController.js** que serão exportados para os respectivos <u>routes</u>
 
 No <u>models</u> também criamos 3 arquivos:  **PaisesModel.js**, **EstadosModel.js**, **CidadesModel.js** que serão exportados para os respectivos <u>controllers</u>
@@ -366,9 +376,51 @@ module.exports = router
 
 
 
-Os <u>controllers</u> serão classes contendo métodos, que receberão as requisições e decidirão quais manipulações deverão ser realizadas no banco de dados, retornando assim a resposta desta interação
+Os <u>controllers</u> serão classes contendo métodos que receberão as requisições e decidirão quais manipulações deverão ser realizadas no banco de dados pelos <u>models</u>.
 
+ Por lidar com informações externas(requisições), estas devem ser validadas antes prosseguirem para o <u>models</u>, assim criamos no <u>api</u> o diretório **validations** que conterá as funções de validação das informações.
+
+Com todo o ambiente pronto, definimos a classe <u>Controller</u>
+
+```javascript
+const PaisesModel = require('../models/PaisesModel');
+const {validarNome, validarInfo} = require('../validations/paisesValidations')//funções do validations
+
+class PaisesController {
+    static async buscaPorNome(req,res){
+        if(validarNome(req.params.nome)){
+            try{
+                const result = await PaisesModel.buscaPorNome(req.params.nome)
+                return res.status(200).json(result)
+            } catch(err){
+                console.error(err.message);
+                res.status(400).json({message:"ERRO NA BUSCA"})
+            }
+        } else {
+            return res.status(400).json({message:"PARÂMETRO NOME INCORRETO"});
+        }
+    }
+
+module.exports = PaisesController
 ```
+
+E o **paisesValidations.js** definimos da seguinte forma
+
+```javascript
+exports.validarInfo = (info) => {
+    //informações definidas no Schemas
+    if(!info||!info.nome||!info.populacao||!info.linguaMae||!info.pib){
+        return false
+    }
+    return true
+}
+
+exports.validarNome = (nome) => {
+    if(/\d/.test(nome)||/\W/.test(nome)){
+        return false
+    }
+    return true
+}
 ```
 
 
