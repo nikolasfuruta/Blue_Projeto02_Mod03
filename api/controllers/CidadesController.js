@@ -1,16 +1,18 @@
 const CidadesModel = require('../models/CidadesModel');
 const Validate = require('../validations/Validate');
+const moment = require('moment');
 
 class CidadesController {
 
     static async adicionar(req,res){
         if(Validate.validarCidades(req.body)){
             try{
-                const result = await CidadesModel.adicionar(req.body);
-                return res.status(201).json(result);
+               req.body.aniversarioDaCidade = moment(req.body.aniversarioDaCidade, "DD/MM/YYYY").format("YYYY-MM-DD")
+                await CidadesModel.adicionar(req.body);
+                return res.status(201).json({message:"ADICIONADO"});
             } catch(err){
                 console.error(err.message);
-                return res.status(400).json({message:"ERRO AO ADICIONAR"});
+                return res.status(400).json({message:"ERRO AO ADICIONAR"})
             }
         } else {
             return res.status(400).json({message:"INFORMAÇÃO DE CADASTRO INCORRETA"});

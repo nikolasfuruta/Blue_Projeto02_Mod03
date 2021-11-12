@@ -1,12 +1,9 @@
 const Cidades = require('../database/cidadesSchemas');
-const moment = require('moment');
 
 class CidadesModel {
 
     static async adicionar(info){
-        const newDate = moment(info.aniversarioDaCidade, "DD/MM/YYYY").format("YYYY-MM-DD")
-        const newInfo = {...info, newDate}
-        return await Cidades.create(newInfo)
+        return await Cidades.create(info)
     }
 
     static async listar(){

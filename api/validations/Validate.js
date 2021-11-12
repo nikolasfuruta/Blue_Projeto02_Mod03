@@ -21,8 +21,8 @@ class Validate {
         return true
     }
 
-    static validarCidades(){
-        if(!info||!info.nome||!info.quantidadeDeBairros||!info.populacao||!info.aniversarioDaCidade){
+    static validarCidades(info){
+        if(!info||!info.nome||!/\d/.test(info.quantidadeDeBairros)||!info.populacao||!info.aniversarioDaCidade){
             return false
         }
         return true
